@@ -7,19 +7,24 @@ package rest;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import dto.WeatherInfo;
 import facades.WeatherFacade;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.info.Contact;
 import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.servers.Server;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import java.io.IOException;
 import java.util.List;
-import javax.persistence.EntityManagerFactory;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import utils.EMF_Creator;
+
 
 /**
  *
@@ -32,10 +37,6 @@ import utils.EMF_Creator;
                 description = "API to get weather info.",
                 contact = @Contact(name = "Obaydah & Sinan", email = "sinanjasar@live.dk")
         ),
-        tags = {
-            @Tag(name = "server", description = "API related to person Info")
-
-        },
         servers = {
             @Server(
                     description = "For Local host testing",
@@ -48,17 +49,40 @@ import utils.EMF_Creator;
 
         }
 )
-@Path("server")
+@Path("weather")
 public class WeatherResource {
 
-    private static final WeatherFacade FACADE = WeatherFacade.getServerFacade();
+    private static final WeatherFacade FACADE = WeatherFacade.getWeatherFacade();
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-
-    @Path("all")
+    
+    
+//    @Operation(summary = "Retrieves detailed information about the weather for a given city at a given date",
+//            tags = {"Weather details"},
+//            responses = {
+//                @ApiResponse(
+//                        content = @Content(mediaType = "application/json", schema = @Schema(implementation = WeatherInfo.class))),
+//                @ApiResponse(responseCode = "200", description = "The requested weather details were succesfully found"),
+//                @ApiResponse(responseCode = "404", description = "The requested weather details could not be found")})
+//    @Path("{city}/{date}")
+//    @GET
+//    @Produces({MediaType.APPLICATION_JSON})
+//    public void getWeatherDetails(@PathParam("city") String city, @PathParam("date") String date) throws IOException {
+////        return FACADE.getWeatherDetails(city, date);
+//    }
+//    
+    
+    @Operation(summary = "Retrieves weather information for the upcoming 7 days (today included) in order",
+            tags = {"Seven day forecast"},
+            responses = {
+                @ApiResponse(
+                        content = @Content(mediaType = "application/json", schema = @Schema(implementation = WeatherInfo.class))),
+                @ApiResponse(responseCode = "200", description = "The requested weather data was succesfully found"),
+                @ApiResponse(responseCode = "404", description = "The requested weather data could not be found")})
+    @Path("{city}")
     @GET
     @Produces({MediaType.APPLICATION_JSON})
-    public void getDataFromServers() {
-//        return FACADE.fetchFromServers();
+    public List<WeatherInfo> sevenDayForecast(@PathParam("city") String city) throws IOException {
+        return FACADE.get7DayForecast(city);
     }
 
 }

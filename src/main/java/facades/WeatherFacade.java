@@ -5,22 +5,25 @@
  */
 package facades;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import dto.WeatherInfo;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
-import java.util.Queue;
 import java.util.Scanner;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 /**
  *
@@ -29,6 +32,7 @@ import java.util.concurrent.Future;
 public class WeatherFacade {
 
     private static WeatherFacade instance;
+    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private final static String APIKEY = "50f8d14b7d8a4c64ba1d5c32c9a3aae4";
 
     //Private Constructor to ensure Singleton
@@ -37,10 +41,9 @@ public class WeatherFacade {
 
     /**
      *
-     * @param _emf
      * @return an instance of this facade class.
      */
-    public static WeatherFacade getServerFacade() {
+    public static WeatherFacade getWeatherFacade() {
         if (instance == null) {
             instance = new WeatherFacade();
         }
@@ -56,19 +59,19 @@ public class WeatherFacade {
         String jsonStr = "";
         try (Scanner scan = new Scanner(con.getInputStream())) {
             while (scan.hasNext()) {
+
                 jsonStr += scan.nextLine()+"\n";
             }
         }
         return jsonStr;
     }
-    
+
     public static void main(String[] args) throws IOException {
         /*for(String s : fetchHourlyInfo("Copenhagen").split(",")){
             System.out.println(s);
         }*/
         System.out.print(fetchHourlyInfo("Copenhagen"));
     }
-    
 
 //    /**
 //     * Should call fetchFromServer method on multiple servers
@@ -103,4 +106,30 @@ public class WeatherFacade {
 //        }
 //        return posts;
 //    }
+    /**
+     * Returns a list of seven WeatherInfo objects in order
+     * @param city
+     * @return JsonArray
+     * @throws ProtocolException
+     * @throws IOException
+     */
+    public List<WeatherInfo> get7DayForecast(String city) throws ProtocolException, IOException {
+        URL url = new URL("https://api.weatherbit.io/v2.0/forecast/daily?days=7&key=" + APIKEY + "&city=" + city);
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        con.setRequestMethod("GET");
+        con.setRequestProperty("Accept", "application/json;charset=UTF-8");
+        String jsonStr = "";
+        try (Scanner scan = new Scanner(con.getInputStream())) {
+            while (scan.hasNext()) {
+                jsonStr += scan.nextLine();
+            }
+        }
+        List<WeatherInfo> weatherList = new ArrayList();
+        JsonArray allDays = new JsonParser().parse(jsonStr)
+                .getAsJsonObject().get("data").getAsJsonArray();
+        for (JsonElement day : allDays) {
+            weatherList.add(new WeatherInfo(day.getAsJsonObject()));
+        }
+        return weatherList;
+    }
 }
