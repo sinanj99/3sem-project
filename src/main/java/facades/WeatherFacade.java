@@ -21,7 +21,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import javax.persistence.EntityManagerFactory;
 
 /**
  *
@@ -30,7 +29,6 @@ import javax.persistence.EntityManagerFactory;
 public class WeatherFacade {
 
     private static WeatherFacade instance;
-    private static EntityManagerFactory emf;
     private final static String APIKEY = "50f8d14b7d8a4c64ba1d5c32c9a3aae4";
 
     //Private Constructor to ensure Singleton
@@ -42,9 +40,8 @@ public class WeatherFacade {
      * @param _emf
      * @return an instance of this facade class.
      */
-    public static WeatherFacade getServerFacade(EntityManagerFactory _emf) {
+    public static WeatherFacade getServerFacade() {
         if (instance == null) {
-            emf = _emf;
             instance = new WeatherFacade();
         }
         return instance;

@@ -51,13 +51,7 @@ import utils.EMF_Creator;
 @Path("server")
 public class WeatherResource {
 
-    private static final EntityManagerFactory EMF = EMF_Creator.createEntityManagerFactory(
-            "pu",
-            "jdbc:mysql://localhost:3307/startcode",
-            "dev",
-            "ax2",
-            EMF_Creator.Strategy.CREATE);
-    private static final WeatherFacade FACADE = WeatherFacade.getServerFacade(EMF);
+    private static final WeatherFacade FACADE = WeatherFacade.getServerFacade();
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
     @Path("all")
