@@ -48,18 +48,24 @@ public class WeatherFacade {
     }
 
 
-    private static String fetchFromServer(String server) throws MalformedURLException, ProtocolException, IOException {
-        URL url = new URL("https://jsonplaceholder.typicode.com/posts/" + server);
+    private static String fetchHourlyInfo(String city) throws MalformedURLException, ProtocolException, IOException {
+        URL url = new URL("https://api.weatherbit.io/v2.0/forecast/hourly?hours=2&city="+city+"&key="+APIKEY);
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("GET");
         con.setRequestProperty("Accept", "application/json;charset=UTF-8");
         String jsonStr = "";
         try (Scanner scan = new Scanner(con.getInputStream())) {
             while (scan.hasNext()) {
-                jsonStr += scan.nextLine();
+                jsonStr += scan.nextLine()+"\n";
             }
         }
         return jsonStr;
+    }
+    
+    public static void main(String[] args) throws IOException {
+        for(String s : fetchHourlyInfo("Copenhagen").split(",")){
+            System.out.println(s);
+        }
     }
     
 
