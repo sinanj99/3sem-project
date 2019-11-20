@@ -9,20 +9,16 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import dto.WeatherInfo;
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 /**
@@ -49,28 +45,33 @@ public class WeatherFacade {
         }
         return instance;
     }
-
-
-    private static String fetchHourlyInfo(String city) throws MalformedURLException, ProtocolException, IOException {
-        URL url = new URL("https://api.weatherbit.io/v2.0/forecast/hourly?hours=2&city="+city+"&key="+APIKEY);
+    /**
+    * Returns a Map containing the temperature for the next 24 hours
+    * @param city
+    * @return Map<String, Integer>
+    * @throws ProtocolException
+    * @throws IOException
+    */
+    private static Map<String, Integer> getHourlyTemp(String city) throws ProtocolException, IOException {
+        URL url = new URL("https://api.weatherbit.io/v2.0/forecast/hourly?hours=24&city="+city+"&key="+APIKEY);
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("GET");
         con.setRequestProperty("Accept", "application/json;charset=UTF-8");
         String jsonStr = "";
         try (Scanner scan = new Scanner(con.getInputStream())) {
             while (scan.hasNext()) {
-
                 jsonStr += scan.nextLine()+"\n";
             }
         }
-        return jsonStr;
-    }
-
-    public static void main(String[] args) throws IOException {
-        /*for(String s : fetchHourlyInfo("Copenhagen").split(",")){
-            System.out.println(s);
-        }*/
-        System.out.print(fetchHourlyInfo("Copenhagen"));
+        
+        Map<String, Integer> hourlyTempMap = new LinkedHashMap<>();
+        JsonArray hours = new JsonParser().parse(jsonStr)
+                .getAsJsonObject().get("data").getAsJsonArray();
+        for (JsonElement hour : hours) {
+            String key = hour.getAsJsonObject().get("datetime").getAsString();
+            hourlyTempMap.put(key.substring(key.length()-2), hour.getAsJsonObject().get("temp").getAsInt());            
+        }
+        return hourlyTempMap;
     }
 
 //    /**
@@ -113,7 +114,7 @@ public class WeatherFacade {
      * @throws ProtocolException
      * @throws IOException
      */
-    public List<WeatherInfo> get7DayForecast(String city) throws ProtocolException, IOException {
+    public static List<WeatherInfo> get7DayForecast(String city) throws ProtocolException, IOException {
         URL url = new URL("https://api.weatherbit.io/v2.0/forecast/daily?days=7&key=" + APIKEY + "&city=" + city);
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("GET");

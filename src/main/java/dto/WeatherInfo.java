@@ -104,5 +104,11 @@ public class WeatherInfo {
     public String getDate() {
         return date;
     }
+
+    @Override
+    public String toString() {
+        return "WeatherInfo{" + "date=" + date + ", sunrise=" + sunrise + ", sunset=" + sunset + ", temp=" + temp + ", pop=" + pop + ", clouds=" + clouds + ", humidity=" + humidity + ", windSpeed=" + windSpeed + '}';
+    }
+    
     
 }
