@@ -5,14 +5,17 @@
  */
 package dto;
 
+import com.google.gson.JsonObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  *
  * @author sinanjasar
  */
-public class Weather {
+public class WeatherInfo {
 
+    @Schema(example = "2019-11-20", description = "Date (YYYY-DD-MM)")
+    private String date;
     @Schema(example = "09:44", description = "Sunrise Time (24-hour clock)")
     private String sunrise;
     @Schema(example = "16:52", description = "Sunset Time (24-hour clock)")
@@ -27,18 +30,19 @@ public class Weather {
     private int humidity;
     @Schema(example = "8.7", description = "Windspeed (m/s)")
     private float windSpeed;
-   
-    public Weather() {
+
+    public WeatherInfo() {
     }
 
-    public Weather(String sunset, String sunrise, float temp, int pop, int clouds, int humidity, float windSpeed) {
-        this.sunset = sunset;
-        this.sunrise = sunrise;
-        this.temp = temp;
-        this.pop = pop;
-        this.clouds = clouds;
-        this.humidity = humidity;
-        this.windSpeed = windSpeed;
+    public WeatherInfo(JsonObject o) {
+        this.date = o.get("valid_date").getAsString();
+        this.sunrise = o.get("sunrise_ts").getAsString();
+        this.sunset = o.get("sunset_ts").getAsString();
+        this.temp = o.get("temp").getAsInt();
+        this.pop = o.get("pop").getAsInt();
+        this.clouds = o.get("clouds").getAsInt();
+        this.humidity = o.get("rh").getAsInt();
+        this.windSpeed = o.get("wind_spd").getAsFloat();
     }
 
     public String getSunset() {
@@ -97,4 +101,8 @@ public class Weather {
         this.windSpeed = windSpeed;
     }
 
+    public String getDate() {
+        return date;
+    }
+    
 }
