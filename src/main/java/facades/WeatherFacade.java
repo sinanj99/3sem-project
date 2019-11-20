@@ -31,6 +31,7 @@ public class WeatherFacade {
 
     private static WeatherFacade instance;
     private static EntityManagerFactory emf;
+    private final static String APIKEY = "50f8d14b7d8a4c64ba1d5c32c9a3aae4";
 
     //Private Constructor to ensure Singleton
     private WeatherFacade() {
@@ -63,6 +64,7 @@ public class WeatherFacade {
         }
         return jsonStr;
     }
+    
 
 //    /**
 //     * Should call fetchFromServer method on multiple servers
