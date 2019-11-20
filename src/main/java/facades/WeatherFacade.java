@@ -5,22 +5,13 @@
  */
 package facades;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
 import java.util.Scanner;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+
 
 /**
  *
@@ -37,10 +28,10 @@ public class WeatherFacade {
 
     /**
      *
-     * @param _emf
      * @return an instance of this facade class.
      */
-    public static WeatherFacade getServerFacade() {
+
+    public static WeatherFacade getWeatherFacade() {
         if (instance == null) {
             instance = new WeatherFacade();
         }
