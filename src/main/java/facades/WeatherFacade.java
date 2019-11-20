@@ -63,9 +63,10 @@ public class WeatherFacade {
     }
     
     public static void main(String[] args) throws IOException {
-        for(String s : fetchHourlyInfo("Copenhagen").split(",")){
+        /*for(String s : fetchHourlyInfo("Copenhagen").split(",")){
             System.out.println(s);
-        }
+        }*/
+        System.out.print(fetchHourlyInfo("Copenhagen"));
     }
     
 
