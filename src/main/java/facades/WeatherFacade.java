@@ -35,8 +35,7 @@ import java.util.Scanner;
 public class WeatherFacade {
 
     private static WeatherFacade instance;
-    private final static String APIKEY = "50f8d14b7d8a4c64ba1d5c32c9a3aae4"; //must be read as env variable
-
+    private final String APIKEY = getApiKey();
     //Private Constructor to ensure Singleton
     private WeatherFacade() {
     }
@@ -51,7 +50,9 @@ public class WeatherFacade {
         }
         return instance;
     }
-
+    private String getApiKey() {
+        return System.getenv("API_KEY");
+    }
     /**
      * Returns a Map containing the temperature for the next 24 hours
      *
