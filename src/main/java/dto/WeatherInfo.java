@@ -7,6 +7,9 @@ package dto;
 
 import com.google.gson.JsonObject;
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 
 /**
  *
@@ -36,13 +39,24 @@ public class WeatherInfo {
 
     public WeatherInfo(JsonObject o) {
         this.date = o.get("valid_date").getAsString();
-        this.sunrise = o.get("sunrise_ts").getAsString();
-        this.sunset = o.get("sunset_ts").getAsString();
+        this.sunrise = getTime(o.get("sunrise_ts").getAsLong());
+        this.sunset = getTime(o.get("sunset_ts").getAsLong());
         this.temp = o.get("temp").getAsInt();
         this.pop = o.get("pop").getAsInt();
         this.clouds = o.get("clouds").getAsInt();
         this.humidity = o.get("rh").getAsInt();
         this.windSpeed = o.get("wind_spd").getAsFloat();
+    }
+
+    /**
+     * Converts timestamp to HH:mm format
+     * @param timeStamp
+     * @return a String representation of current time in HH:mm format
+     */
+    private String getTime(long timeStamp) {
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm");
+        return Instant.ofEpochSecond(timeStamp).
+                atZone(ZoneOffset.UTC).toLocalTime().format(dtf);
     }
 
     public String getSunset() {
@@ -109,6 +123,4 @@ public class WeatherInfo {
     public String toString() {
         return "WeatherInfo{" + "date=" + date + ", sunrise=" + sunrise + ", sunset=" + sunset + ", temp=" + temp + ", pop=" + pop + ", clouds=" + clouds + ", humidity=" + humidity + ", windSpeed=" + windSpeed + '}';
     }
-    
-    
 }
