@@ -9,6 +9,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import dto.WeatherInfo;
 import java.io.IOException;
@@ -107,12 +108,21 @@ public class WeatherFacade {
         URL url = new URL("https://api.weatherbit.io/v2.0/forecast/daily?days=7&key=" + APIKEY + "&city=" + city);
         String jsonStr = retrieveData(url);
         List<WeatherInfo> weatherList = new ArrayList();
-        JsonArray allDays = new JsonParser().parse(jsonStr)
-                .getAsJsonObject().get("data").getAsJsonArray();
+        
+        JsonObject jsonStrParsedToObject = new JsonParser().parse(jsonStr).getAsJsonObject();
+        JsonArray allDays = jsonStrParsedToObject.get("data").getAsJsonArray();
+        
+        /*
+            Ved godt vi bare kan bruge parameteren city, men hvis brugeren 
+            fx. taster copenhagen, CoPenHaGEN, så vil det blive vist på den måde i forecast viewet
+        */
+        String city_ = jsonStrParsedToObject.get("city_name").getAsString();
+        
         for (JsonElement day : allDays) {
+            day.getAsJsonObject().addProperty("city", city_);
             weatherList.add(new WeatherInfo(day.getAsJsonObject()));
         }
         return weatherList;
 
-    }
+    }    
 }

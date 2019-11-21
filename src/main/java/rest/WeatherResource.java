@@ -97,8 +97,10 @@ public class WeatherResource {
     @Path("/daily/{city}")
     @GET
     @Produces({MediaType.APPLICATION_JSON})
-    public List<WeatherInfo> getDaily(@PathParam("city") String city) throws IOException {
-        return FACADE.get7DayForecast(city);
+    public WeatherInfo getDaily(@PathParam("city") String city) throws IOException {
+        WeatherInfo day = get7DayForecast(city).get(0);
+        day.setHourlyTemp(FACADE.getHourlyForecast(city));
+        return day;
     }
     
     @Operation(summary = "Retrieves the temperature for the next 24 hours",

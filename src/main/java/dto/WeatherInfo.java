@@ -10,13 +10,16 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.Map;
 
 /**
  *
  * @author sinanjasar
  */
 public class WeatherInfo {
-
+    
+    @Schema (example = "Copenhagen", description = "City")
+    private String city;
     @Schema(example = "2019-11-20", description = "Date (YYYY-DD-MM)")
     private String date;
     @Schema(example = "09:44", description = "Sunrise Time (24-hour clock)")
@@ -33,11 +36,13 @@ public class WeatherInfo {
     private int humidity;
     @Schema(example = "8.7", description = "Windspeed (m/s)")
     private float windSpeed;
+    private Map<String, Integer> hourlyTemp;
 
     public WeatherInfo() {
     }
 
     public WeatherInfo(JsonObject o) {
+        this.city = o.get("city").getAsString();
         this.date = o.get("valid_date").getAsString();
         this.sunrise = getTime(o.get("sunrise_ts").getAsLong());
         this.sunset = getTime(o.get("sunset_ts").getAsLong());
@@ -58,6 +63,16 @@ public class WeatherInfo {
         return Instant.ofEpochSecond(timeStamp).
                 atZone(ZoneOffset.UTC).toLocalTime().format(dtf);
     }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+    
+    
 
     public String getSunset() {
         return sunset;
@@ -118,6 +133,16 @@ public class WeatherInfo {
     public String getDate() {
         return date;
     }
+
+    public Map<String, Integer> getHourlyTemp() {
+        return hourlyTemp;
+    }
+
+    public void setHourlyTemp(Map<String, Integer> hourlyTemp) {
+        this.hourlyTemp = hourlyTemp;
+    }
+    
+    
 
     @Override
     public String toString() {
