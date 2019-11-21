@@ -34,7 +34,7 @@ import javax.ws.rs.core.MediaType;
  */
 @OpenAPIDefinition(
         info = @Info(
-                title = "Weather API",
+                title = "GOATED Weather API",
                 version = "1.0",
                 description = "API to get weather info.",
                 contact = @Contact(name = "Obaydah & Sinan", email = "sinanjasar@live.dk")
@@ -80,10 +80,24 @@ public class WeatherResource {
                         content = @Content(mediaType = "application/json")),
                 @ApiResponse(responseCode = "200", description = "The requested weather data was succesfully found"),
                 @ApiResponse(responseCode = "404", description = "The requested weather data could not be found")})
-    @Path("{city}")
+    @Path("/forecast7/{city}")
     @GET
     @Produces({MediaType.APPLICATION_JSON})
-    public List<WeatherInfo> sevenDayForecast(@PathParam("city") String city) throws IOException {
+    public List<WeatherInfo> get7DayForecast(@PathParam("city") String city) throws IOException {
+        return FACADE.get7DayForecast(city);
+    }
+    
+    @Operation(summary = "Retrieves weather information for the current date",
+            tags = {"Today's weather"},
+            responses = {
+                @ApiResponse(
+                        content = @Content(mediaType = "application/json", schema = @Schema(implementation = WeatherInfo.class))),
+                @ApiResponse(responseCode = "200", description = "The requested weather data was succesfully found"),
+                @ApiResponse(responseCode = "404", description = "The requested weather data could not be found")})
+    @Path("/daily/{city}")
+    @GET
+    @Produces({MediaType.APPLICATION_JSON})
+    public List<WeatherInfo> getDaily(@PathParam("city") String city) throws IOException {
         return FACADE.get7DayForecast(city);
     }
     
