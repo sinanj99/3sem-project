@@ -18,7 +18,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.servers.Server;
 import java.io.IOException;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -75,7 +77,7 @@ public class WeatherResource {
             tags = {"Seven day forecast"},
             responses = {
                 @ApiResponse(
-                        content = @Content(mediaType = "application/json", schema = @Schema(implementation = WeatherInfo.class))),
+                        content = @Content(mediaType = "application/json")),
                 @ApiResponse(responseCode = "200", description = "The requested weather data was succesfully found"),
                 @ApiResponse(responseCode = "404", description = "The requested weather data could not be found")})
     @Path("{city}")
@@ -83,6 +85,21 @@ public class WeatherResource {
     @Produces({MediaType.APPLICATION_JSON})
     public List<WeatherInfo> sevenDayForecast(@PathParam("city") String city) throws IOException {
         return FACADE.get7DayForecast(city);
+    }
+    
+    @Operation(summary = "Retrieves the temperature for the next 24 hours",
+            tags = {"Hourly forecast"},
+            responses = {
+                @ApiResponse(
+                        content = @Content(mediaType = "application/json")),
+                @ApiResponse(responseCode = "200", description = "The requested weather data was succesfully found"),
+                @ApiResponse(responseCode = "404", description = "The requested weather data could not be found")})
+    @Path("hourly/{city}")
+    @GET
+    @Produces({MediaType.APPLICATION_JSON})
+    public Map<String, Integer> hourlyForecast(@PathParam("city") String city) throws IOException {
+        return FACADE.getHourlyForecast(city);
+        
     }
 
 }

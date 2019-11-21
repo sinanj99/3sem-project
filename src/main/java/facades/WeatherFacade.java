@@ -60,7 +60,7 @@ public class WeatherFacade {
      * @throws ProtocolException
      * @throws IOException
      */
-    private Map<String, Integer> getHourlyTemp(String city) throws ProtocolException, IOException {
+    public Map<String, Integer> getHourlyForecast(String city) throws ProtocolException, IOException {
         URL url = new URL("https://api.weatherbit.io/v2.0/forecast/hourly?hours=24&city=" + city + "&key=" + APIKEY);
         String jsonStr = retrieveData(url);
         Map<String, Integer> hourlyTempMap = new LinkedHashMap<>();
