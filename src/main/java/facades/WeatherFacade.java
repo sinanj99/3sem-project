@@ -36,7 +36,8 @@ import java.util.Scanner;
 public class WeatherFacade {
 
     private static WeatherFacade instance;
-    private final String APIKEY = getApiKey();
+    private final String APIKEY = "50f8d14b7d8a4c64ba1d5c32c9a3aae4";
+
     //Private Constructor to ensure Singleton
     private WeatherFacade() {
     }
@@ -51,9 +52,11 @@ public class WeatherFacade {
         }
         return instance;
     }
+
     private String getApiKey() {
         return System.getenv("API_KEY");
     }
+
     /**
      * Returns a Map containing the temperature for the next 24 hours
      *
@@ -77,10 +80,11 @@ public class WeatherFacade {
 
     /**
      * Returns json from the specified URL
+     *
      * @param url
      * @return json String
      * @throws ProtocolException
-     * @throws IOException 
+     * @throws IOException
      */
     private String retrieveData(URL url) throws ProtocolException, IOException {
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
@@ -98,31 +102,61 @@ public class WeatherFacade {
     /**
      * Returns a list of 7 WeatherInfo objects representing the weather for the
      * upcoming week.
+     *
      * @param city
      * @return JsonArray
      * @throws java.net.MalformedURLException
      * @throws ProtocolException
      * @throws IOException
      */
-    public List<WeatherInfo> get7DayForecast(String city) throws MalformedURLException, IOException {
+    public List<WeatherInfo> get7DayForecastCity(String city) throws MalformedURLException, IOException {
         URL url = new URL("https://api.weatherbit.io/v2.0/forecast/daily?days=7&key=" + APIKEY + "&city=" + city);
         String jsonStr = retrieveData(url);
         List<WeatherInfo> weatherList = new ArrayList();
-        
+
         JsonObject jsonStrParsedToObject = new JsonParser().parse(jsonStr).getAsJsonObject();
         JsonArray allDays = jsonStrParsedToObject.get("data").getAsJsonArray();
-        
+
         /*
             Ved godt vi bare kan bruge parameteren city, men hvis brugeren 
             fx. taster copenhagen, CoPenHaGEN, så vil det blive vist på den måde i forecast viewet
-        */
+         */
         String city_ = jsonStrParsedToObject.get("city_name").getAsString();
-        
+
         for (JsonElement day : allDays) {
             day.getAsJsonObject().addProperty("city", city_);
             weatherList.add(new WeatherInfo(day.getAsJsonObject()));
         }
         return weatherList;
 
-    }    
+    }
+
+    /**
+     * Returns a list of 7 WeatherInfo objects representing the weather for the
+     * upcoming week.
+     *
+     * @param lat
+     * @param lon
+     * @return JsonArray
+     * @throws java.net.MalformedURLException
+     * @throws ProtocolException
+     * @throws IOException
+     */
+    public List<WeatherInfo> get7DayForecastCord(String lat, String lon) throws MalformedURLException, IOException {
+        URL url = new URL("https://api.weatherbit.io/v2.0/forecast/daily?days=7&key=" + APIKEY + "&lat=" + lat + "&lon=" + lon);
+        String jsonStr = retrieveData(url);
+        List<WeatherInfo> weatherList = new ArrayList();
+        JsonArray allDays = new JsonParser().parse(jsonStr)
+                .getAsJsonObject().get("data").getAsJsonArray();
+        for (JsonElement day : allDays) {
+            weatherList.add(new WeatherInfo(day.getAsJsonObject()));
+        }
+        return weatherList;
+
+    }
+
+    public static void main(String[] args) {
+        System.out.println(System.getenv("API_KEY"));
+    }
+
 }

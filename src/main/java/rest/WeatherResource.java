@@ -18,7 +18,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.servers.Server;
 import java.io.IOException;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import javax.ws.rs.GET;
@@ -26,7 +25,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-
 
 /**
  *
@@ -56,8 +54,7 @@ public class WeatherResource {
 
     private static final WeatherFacade FACADE = WeatherFacade.getWeatherFacade();
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-    
-    
+
 //    @Operation(summary = "Retrieves detailed information about the weather for a given city at a given date",
 //            tags = {"Weather details"},
 //            responses = {
@@ -72,7 +69,6 @@ public class WeatherResource {
 ////        return FACADE.getWeatherDetails(city, date);
 //    }
 //    
-    
     @Operation(summary = "Retrieves weather information for the upcoming 7 days (today included) in order",
             tags = {"Seven day forecast"},
             responses = {
@@ -84,9 +80,23 @@ public class WeatherResource {
     @GET
     @Produces({MediaType.APPLICATION_JSON})
     public List<WeatherInfo> get7DayForecast(@PathParam("city") String city) throws IOException {
-        return FACADE.get7DayForecast(city);
+        return FACADE.get7DayForecastCity(city);
     }
-    
+
+    @Operation(summary = "Retrieves weather information for the upcoming 7 days (today included) in order",
+            tags = {"Seven day forecast"},
+            responses = {
+                @ApiResponse(
+                        content = @Content(mediaType = "application/json")),
+                @ApiResponse(responseCode = "200", description = "The requested weather data was succesfully found"),
+                @ApiResponse(responseCode = "404", description = "The requested weather data could not be found")})
+    @Path("/forecast7/{lat},{lon}")
+    @GET
+    @Produces({MediaType.APPLICATION_JSON})
+    public List<WeatherInfo> get7DayForecast(@PathParam("lat") String lat, @PathParam("lon") String lon) throws IOException {
+        return FACADE.get7DayForecastCord(lat,lon);
+    }
+
     @Operation(summary = "Retrieves weather information for the current date",
             tags = {"Today's weather"},
             responses = {
@@ -97,12 +107,11 @@ public class WeatherResource {
     @Path("/daily/{city}")
     @GET
     @Produces({MediaType.APPLICATION_JSON})
-    public WeatherInfo getDaily(@PathParam("city") String city) throws IOException {
-        WeatherInfo day = get7DayForecast(city).get(0);
-        day.setHourlyTemp(FACADE.getHourlyForecast(city));
-        return day;
+    public List<WeatherInfo> getDailyWeatherInfo(@PathParam("city") String city) throws IOException {
+        return FACADE.get7DayForecastCity(city);
+
     }
-    
+
     @Operation(summary = "Retrieves the temperature for the next 24 hours",
             tags = {"Hourly forecast"},
             responses = {
@@ -114,8 +123,10 @@ public class WeatherResource {
     @GET
     @Produces({MediaType.APPLICATION_JSON})
     public Map<String, Integer> hourlyForecast(@PathParam("city") String city) throws IOException {
-        return FACADE.getHourlyForecast(city);
-        
+        WeatherInfo day = get7DayForecast(city).get(0);
+        day.setHourlyTemp(FACADE.getHourlyForecast(city));
+        return day;
+
     }
 
 }
