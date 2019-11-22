@@ -5,25 +5,19 @@
  */
 package facades;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import dto.WeatherInfo;
+import dto.City;
+import dto.Weather;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
-import java.sql.Time;
-import java.time.Instant;
-import java.time.LocalTime;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +30,8 @@ import java.util.Scanner;
 public class WeatherFacade {
 
     private static WeatherFacade instance;
-    private final String APIKEY = "50f8d14b7d8a4c64ba1d5c32c9a3aae4";
+    private final String WEATHERBIT = getWeatherbit();
+    private final String OPENCAGE = getOpencage();
 
     //Private Constructor to ensure Singleton
     private WeatherFacade() {
@@ -53,20 +48,14 @@ public class WeatherFacade {
         return instance;
     }
 
-    private String getApiKey() {
-        return System.getenv("API_KEY");
+    private String getWeatherbit() {
+        return System.getenv("WEATHERBIT");
     }
-
-    /**
-     * Returns a Map containing the temperature for the next 24 hours
-     *
-     * @param city
-     * @return Map<String, Integer>
-     * @throws ProtocolException
-     * @throws IOException
-     */
-    public Map<String, Integer> getHourlyForecast(String city) throws ProtocolException, IOException {
-        URL url = new URL("https://api.weatherbit.io/v2.0/forecast/hourly?hours=24&city=" + city + "&key=" + APIKEY);
+    private String getOpencage() {
+        return System.getenv("OPENCAGE");
+    }
+    public Map<String, Integer> getHourlyForecast(Double lat, Double lon) throws ProtocolException, IOException {
+        URL url = new URL("https://api.weatherbit.io/v2.0/forecast/hourly?hours=24&lat=" + lat + "&lon=" + lon + "&key=" + WEATHERBIT);
         String jsonStr = retrieveData(url);
         Map<String, Integer> hourlyTempMap = new LinkedHashMap<>();
         JsonArray hours = new JsonParser().parse(jsonStr)
@@ -77,10 +66,20 @@ public class WeatherFacade {
         }
         return hourlyTempMap;
     }
+    /**
+     * Returns a Map containing the temperature for the next 24 hours
+     * @param city
+     * @return Map<String, Integer>
+     * @throws ProtocolException
+     * @throws IOException
+     */
+    public Map<String, Integer> getHourlyForecast(String city) throws ProtocolException, IOException {
+        Map<String, Double> coordinates = parseToCoordinates(city);
+        return getHourlyForecast(coordinates.get("lat"), coordinates.get("lon"));
+    }
 
     /**
      * Returns json from the specified URL
-     *
      * @param url
      * @return json String
      * @throws ProtocolException
@@ -98,43 +97,28 @@ public class WeatherFacade {
         }
         return jsonStr;
     }
-
+    
     /**
-     * Returns a list of 7 WeatherInfo objects representing the weather for the
-     * upcoming week.
-     *
+     * Forward geocoding
      * @param city
-     * @return JsonArray
-     * @throws java.net.MalformedURLException
-     * @throws ProtocolException
-     * @throws IOException
+     * @return 
+     * @throws MalformedURLException
+     * @throws IOException 
      */
-    public List<WeatherInfo> get7DayForecastCity(String city) throws MalformedURLException, IOException {
-        URL url = new URL("https://api.weatherbit.io/v2.0/forecast/daily?days=7&key=" + APIKEY + "&city=" + city);
+    public Map<String, Double> parseToCoordinates(String city) throws MalformedURLException, IOException{
+        URL url = new URL("https://api.opencagedata.com/geocode/v1/json?q="+city+"&key="+OPENCAGE);
         String jsonStr = retrieveData(url);
-        List<WeatherInfo> weatherList = new ArrayList();
-
-        JsonObject jsonStrParsedToObject = new JsonParser().parse(jsonStr).getAsJsonObject();
-        JsonArray allDays = jsonStrParsedToObject.get("data").getAsJsonArray();
-
-        /*
-            Ved godt vi bare kan bruge parameteren city, men hvis brugeren 
-            fx. taster copenhagen, CoPenHaGEN, så vil det blive vist på den måde i forecast viewet
-         */
-        String city_ = jsonStrParsedToObject.get("city_name").getAsString();
-
-        for (JsonElement day : allDays) {
-            day.getAsJsonObject().addProperty("city", city_);
-            weatherList.add(new WeatherInfo(day.getAsJsonObject()));
-        }
-        return weatherList;
-
+        JsonObject geometry = new JsonParser().parse(jsonStr).getAsJsonObject()
+                .get("results").getAsJsonArray().get(0).getAsJsonObject().get("geometry").getAsJsonObject();
+        Map<String,Double> coordinates = new HashMap();
+        coordinates.put("lat",geometry.get("lat").getAsDouble());
+        coordinates.put("lon",geometry.get("lng").getAsDouble());
+        return coordinates;
     }
-
+    
     /**
-     * Returns a list of 7 WeatherInfo objects representing the weather for the
-     * upcoming week.
-     *
+     * Returns a City object containing city info, and a list of 7 Weather objects representing
+     * the weather for the week.
      * @param lat
      * @param lon
      * @return JsonArray
@@ -142,21 +126,33 @@ public class WeatherFacade {
      * @throws ProtocolException
      * @throws IOException
      */
-    public List<WeatherInfo> get7DayForecastCord(String lat, String lon) throws MalformedURLException, IOException {
-        URL url = new URL("https://api.weatherbit.io/v2.0/forecast/daily?days=7&key=" + APIKEY + "&lat=" + lat + "&lon=" + lon);
+    public City get7DayForecast(Double lat, Double lon) throws MalformedURLException, IOException {
+        URL url = new URL("https://api.weatherbit.io/v2.0/forecast/daily?days=7&key=" + WEATHERBIT + "&lat=" + lat + "&lon=" + lon);
         String jsonStr = retrieveData(url);
-        List<WeatherInfo> weatherList = new ArrayList();
-        JsonArray allDays = new JsonParser().parse(jsonStr)
-                .getAsJsonObject().get("data").getAsJsonArray();
+        List<Weather> weatherList = new ArrayList();
+        JsonObject jsonObject = new JsonParser().parse(jsonStr).getAsJsonObject();
+        JsonArray allDays = jsonObject.get("data").getAsJsonArray();
         for (JsonElement day : allDays) {
-            weatherList.add(new WeatherInfo(day.getAsJsonObject()));
+            weatherList.add(new Weather(day.getAsJsonObject()));
         }
-        return weatherList;
-
+        return new City(jsonObject, weatherList);
+    }
+    /**
+     * Returns a City object containing city info, and a list of 7 Weather objects representing
+     * the weather for the week.
+     * @param city
+     * @return JsonArray
+     * @throws java.net.MalformedURLException
+     * @throws ProtocolException
+     * @throws IOException
+     */
+    public City get7DayForecast(String city) throws MalformedURLException, IOException {
+        Map<String, Double> coordinates = parseToCoordinates(city);
+        return get7DayForecast(coordinates.get("lat"),coordinates.get("lon"));
     }
 
     public static void main(String[] args) {
-        System.out.println(System.getenv("API_KEY"));
+
     }
 
 }
