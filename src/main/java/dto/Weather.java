@@ -16,11 +16,9 @@ import java.util.Map;
  *
  * @author sinanjasar
  */
-public class WeatherInfo {
-    
-    @Schema (example = "Copenhagen", description = "City")
-    private String city;
-    @Schema(example = "2019-11-20", description = "Date (YYYY-DD-MM)")
+public class Weather {
+
+    @Schema(example = "2019-11-20", description = "Date (YYYY-MM-dd)")
     private String date;
     @Schema(example = "09:44", description = "Sunrise Time (24-hour clock)")
     private String sunrise;
@@ -36,13 +34,16 @@ public class WeatherInfo {
     private int humidity;
     @Schema(example = "8.7", description = "Windspeed (m/s)")
     private float windSpeed;
+    @Schema(example = "It's friggin cold", description = "A short description of the weather conditions")
+    private String description;
+    @Schema(required = false, example = "10=8, 11=8, 12=10", description = "Key: hour, value: temperature")
     private Map<String, Integer> hourlyTemp;
 
-    public WeatherInfo() {
+    public Weather(){
     }
 
-    public WeatherInfo(JsonObject o) {
-        this.city = o.get("city").getAsString();
+    public Weather(JsonObject o) {
+        this.description = o.get("weather").getAsJsonObject().get("description").getAsString();
         this.date = o.get("valid_date").getAsString();
         this.sunrise = getTime(o.get("sunrise_ts").getAsLong());
         this.sunset = getTime(o.get("sunset_ts").getAsLong());
@@ -54,7 +55,7 @@ public class WeatherInfo {
     }
 
     /**
-     * Converts timestamp to HH:mm format
+     * Converts unix timestamp to HH:mm format
      * @param timeStamp
      * @return a String representation of current time in HH:mm format
      */
@@ -64,16 +65,11 @@ public class WeatherInfo {
                 atZone(ZoneOffset.UTC).toLocalTime().format(dtf);
     }
 
-    public String getCity() {
-        return city;
-    }
 
-    public void setCity(String city) {
-        this.city = city;
+    public String getDescription() {
+        return description;
     }
     
-    
-
     public String getSunset() {
         return sunset;
     }
@@ -141,11 +137,9 @@ public class WeatherInfo {
     public void setHourlyTemp(Map<String, Integer> hourlyTemp) {
         this.hourlyTemp = hourlyTemp;
     }
-    
-    
 
     @Override
     public String toString() {
-        return "WeatherInfo{" + "date=" + date + ", sunrise=" + sunrise + ", sunset=" + sunset + ", temp=" + temp + ", pop=" + pop + ", clouds=" + clouds + ", humidity=" + humidity + ", windSpeed=" + windSpeed + '}';
+        return "Weather{" + "date=" + date + ", sunrise=" + sunrise + ", sunset=" + sunset + ", temp=" + temp + ", pop=" + pop + ", clouds=" + clouds + ", humidity=" + humidity + ", windSpeed=" + windSpeed + '}';
     }
 }
