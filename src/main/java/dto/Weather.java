@@ -36,8 +36,6 @@ public class Weather {
     private float windSpeed;
     @Schema(example = "It's friggin cold", description = "A short description of the weather conditions")
     private String description;
-    @Schema(required = false, example = "10=8, 11=8, 12=10", description = "Key: hour, value: temperature")
-    private Map<String, Integer> hourlyTemp;
 
     public Weather(){
     }
@@ -130,16 +128,5 @@ public class Weather {
         return date;
     }
 
-    public Map<String, Integer> getHourlyTemp() {
-        return hourlyTemp;
-    }
 
-    public void setHourlyTemp(Map<String, Integer> hourlyTemp) {
-        this.hourlyTemp = hourlyTemp;
-    }
-
-    @Override
-    public String toString() {
-        return "Weather{" + "date=" + date + ", sunrise=" + sunrise + ", sunset=" + sunset + ", temp=" + temp + ", pop=" + pop + ", clouds=" + clouds + ", humidity=" + humidity + ", windSpeed=" + windSpeed + '}';
-    }
 }
