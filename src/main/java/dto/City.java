@@ -8,6 +8,7 @@ package dto;
 import com.google.gson.JsonObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -22,14 +23,16 @@ public class City {
     private Double lat;
     @Schema(example = "69.696969", description = "Longitude")
     private Double lon;
+    private Map<String, String> cityInfo;
     private List<Weather> forecast;
 
-    public City(JsonObject o, List<Weather> forecast) {
+    public City(JsonObject o, List<Weather> forecast, Map<String, String> opencageData) {
         this.cityName = o.get("city_name").getAsString();
         this.country = o.get("country_code").getAsString();
         this.lat = o.get("lat").getAsDouble();
         this.lon = o.get("lon").getAsDouble();
         this.forecast = forecast;
+        this.cityInfo = opencageData;
     }
 
     public String getCityName() {
@@ -48,6 +51,10 @@ public class City {
         return lon;
     }
 
+    public Map<String, String> getCityInfo() {
+        return cityInfo;
+    }
+    
     public List<Weather> getWeatherList() {
         return forecast;
     }
