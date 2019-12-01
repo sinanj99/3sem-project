@@ -17,7 +17,6 @@ import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -74,8 +73,8 @@ public class WeatherFacade {
      * @throws IOException
      */
     public Map<String, Integer> getHourlyForecast(String city) throws ProtocolException, IOException {
-        Map<String, Double> coordinates = parseToCoordinates(city);
-        return getHourlyForecast(coordinates.get("lat"), coordinates.get("lon"));
+        Map<String, String> opencageData = parseToCoordinates(city);
+        return getHourlyForecast(Double.parseDouble(opencageData.get("lat")), Double.parseDouble(opencageData.get("lon")));
     }
 
     /**
@@ -105,15 +104,30 @@ public class WeatherFacade {
      * @throws MalformedURLException
      * @throws IOException 
      */
-    public Map<String, Double> parseToCoordinates(String city) throws MalformedURLException, IOException{
-        URL url = new URL("https://api.opencagedata.com/geocode/v1/json?q="+city+"&key="+OPENCAGE);
+    public Map<String, String> parseToCoordinates(String city) throws MalformedURLException, IOException{
+        URL url = new URL("https://api.opencagedata.com/geocode/v1/json?q="+city+"&language=en&key="+OPENCAGE);
         String jsonStr = retrieveData(url);
-        JsonObject geometry = new JsonParser().parse(jsonStr).getAsJsonObject()
-                .get("results").getAsJsonArray().get(0).getAsJsonObject().get("geometry").getAsJsonObject();
-        Map<String,Double> coordinates = new HashMap();
-        coordinates.put("lat",geometry.get("lat").getAsDouble());
-        coordinates.put("lon",geometry.get("lng").getAsDouble());
-        return coordinates;
+        JsonObject result = new JsonParser().parse(jsonStr).getAsJsonObject()
+                .get("results").getAsJsonArray().get(0).getAsJsonObject();
+        Map<String,String> opencageData = new LinkedHashMap();//annotations
+        opencageData.put("lat",result.get("geometry").getAsJsonObject().get("lat").getAsString());
+        opencageData.put("lon",result.get("geometry").getAsJsonObject().get("lng").getAsString());
+        opencageData.put("continent",result.get("components").getAsJsonObject().get("continent").getAsString());
+        opencageData.put("country",result.get("components").getAsJsonObject().get("country").getAsString());
+        opencageData.put("state",result.get("components").getAsJsonObject().get("state").getAsString());
+        opencageData.put("callingcode",result.get("annotations").getAsJsonObject().get("callingcode").getAsString());
+        opencageData.put("currency_name",result.get("annotations").getAsJsonObject().get("currency").getAsJsonObject().get("name").getAsString());
+        opencageData.put("currency_abbreviation",result.get("annotations").getAsJsonObject().get("currency").getAsJsonObject().get("iso_code").getAsString());
+        opencageData.put("currency_symbol",result.get("annotations").getAsJsonObject().get("currency").getAsJsonObject().get("symbol").getAsString());
+        opencageData.put("currency_subunit",result.get("annotations").getAsJsonObject().get("currency").getAsJsonObject().get("subunit").getAsString());
+        opencageData.put("timezone_region",result.get("annotations").getAsJsonObject().get("timezone").getAsJsonObject().get("name").getAsString());
+        opencageData.put("timezone_short",result.get("annotations").getAsJsonObject().get("timezone").getAsJsonObject().get("short_name").getAsString());
+        opencageData.put("timezone_offset",result.get("annotations").getAsJsonObject().get("timezone").getAsJsonObject().get("offset_string").getAsString());
+        opencageData.put("timezone_offset_seconds",result.get("annotations").getAsJsonObject().get("timezone").getAsJsonObject().get("offset_sec").getAsString());
+        opencageData.put("roadinfo_driveon",result.get("annotations").getAsJsonObject().get("roadinfo").getAsJsonObject().get("drive_on").getAsString());
+        opencageData.put("roadinfo_unit",result.get("annotations").getAsJsonObject().get("roadinfo").getAsJsonObject().get("speed_in").getAsString());
+        opencageData.put("qibla",result.get("annotations").getAsJsonObject().get("qibla").getAsString());
+        return opencageData;
     }
     
     /**
@@ -126,8 +140,9 @@ public class WeatherFacade {
      * @throws ProtocolException
      * @throws IOException
      */
-    public City get7DayForecast(Double lat, Double lon) throws MalformedURLException, IOException {
-        URL url = new URL("https://api.weatherbit.io/v2.0/forecast/daily?days=7&key=" + WEATHERBIT + "&lat=" + lat + "&lon=" + lon);
+    public City get7DayForecast(Map<String, String> opencageData) throws MalformedURLException, IOException {
+        URL url = new URL("https://api.weatherbit.io/v2.0/forecast/daily?days=7&key=" + WEATHERBIT + 
+                "&lat=" + Double.parseDouble(opencageData.get("lat")) + "&lon=" + Double.parseDouble(opencageData.get("lon")));
         String jsonStr = retrieveData(url);
         List<Weather> weatherList = new ArrayList();
         JsonObject jsonObject = new JsonParser().parse(jsonStr).getAsJsonObject();
@@ -135,7 +150,7 @@ public class WeatherFacade {
         for (JsonElement day : allDays) {
             weatherList.add(new Weather(day.getAsJsonObject()));
         }
-        return new City(jsonObject, weatherList);
+        return new City(jsonObject, weatherList, opencageData);
     }
     /**
      * Returns a City object containing city info, and a list of 7 Weather objects representing
@@ -147,8 +162,8 @@ public class WeatherFacade {
      * @throws IOException
      */
     public City get7DayForecast(String city) throws MalformedURLException, IOException {
-        Map<String, Double> coordinates = parseToCoordinates(city);
-        return get7DayForecast(coordinates.get("lat"),coordinates.get("lon"));
+        Map<String, String> opencageData = parseToCoordinates(city);
+        return get7DayForecast(opencageData);
     }
 
     public static void main(String[] args) {

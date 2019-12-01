@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.servers.Server;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -74,8 +75,11 @@ public class WeatherResource {
     @Path("/forecast7/{lat},{lon}")
     @GET
     @Produces({MediaType.APPLICATION_JSON})
-    public City get7DayForecast(@PathParam("lat") Double lat, @PathParam("lon") Double lon) throws IOException {
-        return FACADE.get7DayForecast(lat,lon);
+    public City get7DayForecast(@PathParam("lat") String lat, @PathParam("lon") String lon) throws IOException {
+        Map<String,String> latlon = new HashMap();
+        latlon.put("lat",lat);
+        latlon.put("lon",lon);
+        return FACADE.get7DayForecast(latlon);
     }
 
     @Operation(summary = "Retrieves the temperature for the next 24 hours",
