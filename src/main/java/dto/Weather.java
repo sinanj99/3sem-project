@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.Map;
 
 /**
  *
@@ -34,14 +33,20 @@ public class Weather {
     private int humidity;
     @Schema(example = "8.7", description = "Windspeed (m/s)")
     private float windSpeed;
+    @Schema(example = "201", description = "Code representing weather conditions")
+    private int weatherCode;
+    @Schema(example = "t01d", description = "Icon-code representing weather conditions")
+    private String weatherIcon;
     @Schema(example = "It's friggin cold", description = "A short description of the weather conditions")
-    private String description;
+    private String weatherDescription;
 
     public Weather(){
     }
 
     public Weather(JsonObject o) {
-        this.description = o.get("weather").getAsJsonObject().get("description").getAsString();
+        this.weatherDescription = o.get("weather").getAsJsonObject().get("description").getAsString();
+        this.weatherIcon = o.get("weather").getAsJsonObject().get("icon").getAsString();
+        this.weatherCode = o.get("weather").getAsJsonObject().get("code").getAsInt();
         this.date = o.get("valid_date").getAsString();
         this.sunrise = getTime(o.get("sunrise_ts").getAsLong());
         this.sunset = getTime(o.get("sunset_ts").getAsLong());
@@ -64,8 +69,16 @@ public class Weather {
     }
 
 
-    public String getDescription() {
-        return description;
+    public int getWeatherCode() {
+        return weatherCode;
+    }
+
+    public String getWeatherIcon() {
+        return weatherIcon;
+    }
+
+    public String getWeatherDescription() {
+        return weatherDescription;
     }
     
     public String getSunset() {
