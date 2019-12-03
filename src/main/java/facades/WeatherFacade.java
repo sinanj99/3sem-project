@@ -18,10 +18,10 @@ import java.net.ProtocolException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
-
 /**
  *
  * @author sinanjasar
@@ -53,17 +53,23 @@ public class WeatherFacade {
     private String getOpencage() {
         return System.getenv("OPENCAGE");
     }
-    public Map<String, Integer> getHourlyForecast(Double lat, Double lon) throws ProtocolException, IOException {
+    
+    public static void main(String[] args) throws IOException {
+        WeatherFacade wf = WeatherFacade.getWeatherFacade();
+        
+        //wf.getHourlyForecast("Copenhagen").forEach((k,v)->System.out.println("Item : " + k + " Count : " + v));
+    }
+    public List<String> getHourlyForecast(Double lat, Double lon) throws ProtocolException, IOException {
         URL url = new URL("https://api.weatherbit.io/v2.0/forecast/hourly?hours=24&lat=" + lat + "&lon=" + lon + "&key=" + WEATHERBIT);
         String jsonStr = retrieveData(url);
-        Map<String, Integer> hourlyTempMap = new LinkedHashMap<>();
         JsonArray hours = new JsonParser().parse(jsonStr)
                 .getAsJsonObject().get("data").getAsJsonArray();
+        List<String> hourList = new LinkedList();
+        
         for (JsonElement hour : hours) {
-            String key = hour.getAsJsonObject().get("datetime").getAsString();
-            hourlyTempMap.put(key.substring(key.length() - 2), hour.getAsJsonObject().get("temp").getAsInt());
+            hourList.add(hour.getAsJsonObject().get("timestamp_local").getAsString().split("T")[1].split(":")[0]+","+hour.getAsJsonObject().get("temp").getAsString());
         }
-        return hourlyTempMap;
+        return hourList;
     }
     /**
      * Returns a Map containing the temperature for the next 24 hours
@@ -72,7 +78,7 @@ public class WeatherFacade {
      * @throws ProtocolException
      * @throws IOException
      */
-    public Map<String, Integer> getHourlyForecast(String city) throws ProtocolException, IOException {
+    public List<String> getHourlyForecast(String city) throws ProtocolException, IOException {
         Map<String, String> opencageData = parseToCoordinates(city);
         return getHourlyForecast(Double.parseDouble(opencageData.get("lat")), Double.parseDouble(opencageData.get("lon")));
     }
@@ -164,10 +170,6 @@ public class WeatherFacade {
     public City get7DayForecast(String city) throws MalformedURLException, IOException {
         Map<String, String> opencageData = parseToCoordinates(city);
         return get7DayForecast(opencageData);
-    }
-
-    public static void main(String[] args) {
-
     }
 
 }

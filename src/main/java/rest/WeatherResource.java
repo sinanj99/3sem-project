@@ -4,7 +4,6 @@
  * and open the template in the editor.
  */
 package rest;
-
 import dto.City;
 import facades.WeatherFacade;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
@@ -16,6 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.servers.Server;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -50,7 +50,6 @@ import javax.ws.rs.core.MediaType;
 public class WeatherResource {
 
     private static final WeatherFacade FACADE = WeatherFacade.getWeatherFacade();
-    
     @Operation(summary = "Retrieves weather information for the upcoming 7 days (today included) in order",
             tags = {"Seven day forecast"},
             responses = {
@@ -92,7 +91,7 @@ public class WeatherResource {
     @Path("hourly/{city}")
     @GET
     @Produces({MediaType.APPLICATION_JSON})
-    public Map<String, Integer> hourlyForecast(@PathParam("city") String city) throws IOException {
+    public List<String> hourlyForecast(@PathParam("city") String city) throws IOException {
         return FACADE.getHourlyForecast(city);
     }
     @Operation(summary = "Retrieves the temperature for the next 24 hours",
@@ -105,7 +104,7 @@ public class WeatherResource {
     @Path("hourly/{lat},{lon}")
     @GET
     @Produces({MediaType.APPLICATION_JSON})
-    public Map<String, Integer> hourlyForecast(@PathParam("lat") Double lat,@PathParam("lon") Double lon ) throws IOException {
+    public List<String> hourlyForecast(@PathParam("lat") Double lat,@PathParam("lon") Double lon ) throws IOException {
         return FACADE.getHourlyForecast(lat,lon);
     }
 
