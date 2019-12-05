@@ -119,7 +119,7 @@ public class WeatherFacade {
         String jsonStr = retrieveData(url);
         JsonObject result = new JsonParser().parse(jsonStr).getAsJsonObject()
                 .get("results").getAsJsonArray().get(0).getAsJsonObject();
-        Map<String,String> opencageData = new LinkedHashMap();//annotations
+        Map<String,String> opencageData = new LinkedHashMap();
         opencageData.put("lat",result.get("geometry").getAsJsonObject().get("lat").getAsString());
         opencageData.put("lon",result.get("geometry").getAsJsonObject().get("lng").getAsString());
         opencageData.put("continent",result.get("components").getAsJsonObject().get("continent").getAsString());
@@ -161,9 +161,10 @@ public class WeatherFacade {
         String jsonStr = retrieveData(url);
         List<Weather> weatherList = new ArrayList();
         JsonObject jsonObject = new JsonParser().parse(jsonStr).getAsJsonObject();
-        JsonArray allDays = jsonObject.get("data").getAsJsonArray();;
+        JsonArray allDays = jsonObject.get("data").getAsJsonArray();
+        String timezone = jsonObject.get("timezone").getAsString();
         for (JsonElement day : allDays) {
-            weatherList.add(new Weather(day.getAsJsonObject(), opencageData.get("timezone_region")));
+            weatherList.add(new Weather(day.getAsJsonObject(), timezone));
         }
         return new City(jsonObject, weatherList, opencageData);
     }
