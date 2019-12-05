@@ -14,9 +14,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.servers.Server;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -61,7 +59,7 @@ public class WeatherResource {
     @GET
     @Produces({MediaType.APPLICATION_JSON})
     public City get7DayForecast(@PathParam("city") String city) throws IOException {
-        return FACADE.get7DayForecast(city);
+        return FACADE.forwardCity(city);
     }
 
     @Operation(summary = "Retrieves weather information for the upcoming 7 days (today included) in order",
@@ -74,11 +72,9 @@ public class WeatherResource {
     @Path("/forecast7/{lat},{lon}")
     @GET
     @Produces({MediaType.APPLICATION_JSON})
-    public City get7DayForecast(@PathParam("lat") String lat, @PathParam("lon") String lon) throws IOException {
-        Map<String,String> latlon = new HashMap();
-        latlon.put("lat",lat);
-        latlon.put("lon",lon);
-        return FACADE.get7DayForecast(latlon);
+    public City get7DayForecast(@PathParam("lat") Double lat, @PathParam("lon") Double lon) throws IOException {
+
+        return FACADE.reverseCity(lat,lon);
     }
 
     @Operation(summary = "Retrieves the temperature for the next 24 hours",
@@ -92,7 +88,7 @@ public class WeatherResource {
     @GET
     @Produces({MediaType.APPLICATION_JSON})
     public List<String> hourlyForecast(@PathParam("city") String city) throws IOException {
-        return FACADE.getHourlyForecast(city);
+        return FACADE.hoursByCity(city);
     }
     @Operation(summary = "Retrieves the temperature for the next 24 hours",
             tags = {"Hourly forecast"},
@@ -105,7 +101,7 @@ public class WeatherResource {
     @GET
     @Produces({MediaType.APPLICATION_JSON})
     public List<String> hourlyForecast(@PathParam("lat") Double lat,@PathParam("lon") Double lon ) throws IOException {
-        return FACADE.getHourlyForecast(lat,lon);
+        return FACADE.hoursByCoords(lat,lon);
     }
 
 }

@@ -9,8 +9,6 @@ import com.google.gson.JsonObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
 /**
@@ -50,12 +48,8 @@ public class Weather {
         this.weatherIcon = o.get("weather").getAsJsonObject().get("icon").getAsString();
         this.weatherCode = o.get("weather").getAsJsonObject().get("code").getAsInt();
         this.date = o.get("valid_date").getAsString();
-        
-        
         this.sunrise = getTime(o.get("sunrise_ts").getAsLong(), timezone);
         this.sunset = getTime(o.get("sunset_ts").getAsLong(), timezone);
-        
-        
         this.temp = o.get("temp").getAsInt();
         this.pop = o.get("pop").getAsInt();
         this.clouds = o.get("clouds").getAsInt();
@@ -145,6 +139,11 @@ public class Weather {
 
     public String getDate() {
         return date;
+    }
+
+    @Override
+    public String toString() {
+        return "Weather{" + "date=" + date + ", sunrise=" + sunrise + ", sunset=" + sunset + ", temp=" + temp + ", pop=" + pop + ", clouds=" + clouds + ", humidity=" + humidity + ", windSpeed=" + windSpeed + ", weatherCode=" + weatherCode + ", weatherIcon=" + weatherIcon + ", weatherDescription=" + weatherDescription + '}';
     }
 
 

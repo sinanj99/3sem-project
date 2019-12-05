@@ -7,78 +7,87 @@ package dto;
 
 import com.google.gson.JsonObject;
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.Map;
 
 /**
  *
  * @author sinanjasar
  */
 public class City {
+
     @Schema(example = "Copenhagen", description = "Name of the city")
-    private String cityName;
+    private final String cityName;
     @Schema(example = "Denmark", description = "Name of the country")
-    private String country;
+    private final String country;
     @Schema(example = "Capital Region of Denmark", description = "State")
-    private String state;
+    private final String state;
     @Schema(example = "Europe", description = "Name of the continent which the country is located in")
-    private String continent;
+    private final String continent;
     @Schema(example = "45", description = "Calling code")
-    private String callingCode;
+    private final String callingCode;
     @Schema(example = "14", description = "Local hour in that city")
-    private String localHour;
+    private final String localHour;
     @Schema(example = "Danish kroner", description = "Name of the currency")
-    private String currencyName;
+    private final String currencyName;
     @Schema(example = "DKK", description = "Abbreviation of the currency")
-    private String currencyAbb;
+    private final String currencyAbb;
     @Schema(example = "kr.", description = "Symbol of the currency")
-    private String currencySymbol;
+    private final String currencySymbol;
     @Schema(example = "Øre", description = "Subunit of the currency")
-    private String currencySubunit;
+    private final String currencySubunit;
     @Schema(example = "Europe/Copenhagen", description = "Timezone region")
-    private String timezoneRegion;
+    private final String timezoneRegion;
     @Schema(example = "CET", description = "Timezone short")
-    private String timezoneShort;
+    private final String timezoneShort;
     @Schema(example = "+0100", description = "Timezone offset")
-    private String timezoneOffset;
+    private final String timezoneOffset;
     @Schema(example = "3600", description = "Timezone offset in seconds")
-    private String timezoneOffsetSeconds;
+    private final String timezoneOffsetSeconds;
     @Schema(example = "right", description = "The side of the road which cars drive on")
-    private String roadInfoDriveSide; 
+    private final String roadInfoDriveSide;
     @Schema(example = "km/h", description = "The speed unit")
-    private String roadInfoSpeedUnit;
+    private final String roadInfoSpeedUnit;
     @Schema(example = "138.25", description = "Qibla in degrees")
-    private String qibla;
+    private final String qibla;
     @Schema(example = "50.15235", description = "Latitude")
-    private Double lat;
+    private final Double lat;
     @Schema(example = "69.696969", description = "Longitude")
-    private Double lon;
+    private final Double lon;
     private List<Weather> forecast;
 
-    public City(JsonObject o, List<Weather> forecast, Map<String, String> opencageData) {
-        this.cityName = o.get("city_name").getAsString();
-        this.country = opencageData.get("country");
-        this.state = opencageData.get("state");
-        this.continent = opencageData.get("continent");
-        this.callingCode = opencageData.get("callingcode");
-        this.localHour = opencageData.get("currentHour");
-        this.currencyName = opencageData.get("currency_name");
-        this.currencyAbb = opencageData.get("currency_abbreviation");
-        this.currencySymbol = opencageData.get("currency_symbol");
-        this.currencySubunit = opencageData.get("currency_subunit");
-        this.timezoneRegion = opencageData.get("timezone_region");
-        this.timezoneShort = opencageData.get("timezone_short");
-        this.timezoneOffset = opencageData.get("timezone_offset");
-        this.timezoneOffsetSeconds = opencageData.get("timezone_offset_seconds");
-        this.roadInfoDriveSide = opencageData.get("roadinfo_driveon");
-        this.roadInfoSpeedUnit = opencageData.get("roadinfo_unit");
-        this.qibla = opencageData.get("qibla");
-        this.lat = o.get("lat").getAsDouble();
-        this.lon = o.get("lon").getAsDouble();
-        this.forecast = forecast;
-        
+    public City(JsonObject o) {
+        this.cityName = o.get("components").getAsJsonObject().get("continent").getAsString();
+        this.lat = o.get("geometry").getAsJsonObject().get("lat").getAsDouble();
+        this.lon = o.get("geometry").getAsJsonObject().get("lng").getAsDouble();
+        this.continent = o.get("components").getAsJsonObject().get("continent").getAsString();
+        this.country = o.get("components").getAsJsonObject().get("country").getAsString();
+        this.state = o.get("components").getAsJsonObject().get("state").getAsString();
+        this.callingCode = o.get("annotations").getAsJsonObject().get("callingcode").getAsString();
+        this.currencyName = o.get("annotations").getAsJsonObject().get("currency").getAsJsonObject().get("name").getAsString();
+        this.currencyAbb = o.get("annotations").getAsJsonObject().get("currency").getAsJsonObject().get("iso_code").getAsString();
+        this.currencySymbol = o.get("annotations").getAsJsonObject().get("currency").getAsJsonObject().get("symbol").getAsString();
+        this.currencySubunit = o.get("annotations").getAsJsonObject().get("currency").getAsJsonObject().get("subunit").getAsString();
+        this.timezoneRegion = o.get("annotations").getAsJsonObject().get("timezone").getAsJsonObject().get("name").getAsString();
+        this.timezoneShort = o.get("annotations").getAsJsonObject().get("timezone").getAsJsonObject().get("short_name").getAsString();
+        this.timezoneOffset = o.get("annotations").getAsJsonObject().get("timezone").getAsJsonObject().get("offset_string").getAsString();
+        this.timezoneOffsetSeconds = o.get("annotations").getAsJsonObject().get("timezone").getAsJsonObject().get("offset_sec").getAsString();
+        this.roadInfoDriveSide = o.get("annotations").getAsJsonObject().get("roadinfo").getAsJsonObject().get("drive_on").getAsString();
+        this.roadInfoSpeedUnit = o.get("annotations").getAsJsonObject().get("roadinfo").getAsJsonObject().get("speed_in").getAsString();
+        this.qibla = o.get("annotations").getAsJsonObject().get("qibla").getAsString();
+        this.localHour = getLocalHour(this.timezoneRegion);
     }
-
+    /**
+     * Returns local hour
+     * @return 
+     */
+    private String getLocalHour(String timezoneRegion) {
+        final ZoneId zoneId = ZoneId.of(timezoneRegion);
+        final ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(Instant.now(), zoneId);
+        return zonedDateTime.toString().split("T")[1].split(":")[0];
+    }
     public String getCityName() {
         return cityName;
     }
@@ -150,8 +159,6 @@ public class City {
     public List<Weather> getForecast() {
         return forecast;
     }
-    
-    
 
     public Double getLat() {
         return lat;
@@ -161,8 +168,13 @@ public class City {
         return lon;
     }
 
-    public List<Weather> getWeatherList() {
-        return forecast;
+    public void setForecast(List<Weather> forecast) {
+        this.forecast = forecast;
+    }
+
+    @Override
+    public String toString() {
+        return "City{" + "cityName=" + cityName + ", country=" + country + ", state=" + state + ", continent=" + continent + ", callingCode=" + callingCode + ", localHour=" + localHour + ", currencyName=" + currencyName + ", currencyAbb=" + currencyAbb + ", currencySymbol=" + currencySymbol + ", currencySubunit=" + currencySubunit + ", timezoneRegion=" + timezoneRegion + ", timezoneShort=" + timezoneShort + ", timezoneOffset=" + timezoneOffset + ", timezoneOffsetSeconds=" + timezoneOffsetSeconds + ", roadInfoDriveSide=" + roadInfoDriveSide + ", roadInfoSpeedUnit=" + roadInfoSpeedUnit + ", qibla=" + qibla + ", lat=" + lat + ", lon=" + lon + ", forecast=" + forecast + '}';
     }
 
 }
