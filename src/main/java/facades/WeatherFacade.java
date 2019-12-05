@@ -163,7 +163,7 @@ public class WeatherFacade {
         JsonObject jsonObject = new JsonParser().parse(jsonStr).getAsJsonObject();
         JsonArray allDays = jsonObject.get("data").getAsJsonArray();;
         for (JsonElement day : allDays) {
-            weatherList.add(new Weather(day.getAsJsonObject()));
+            weatherList.add(new Weather(day.getAsJsonObject(), opencageData.get("timezone_region")));
         }
         return new City(jsonObject, weatherList, opencageData);
     }

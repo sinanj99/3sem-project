@@ -8,7 +8,9 @@ package dto;
 import com.google.gson.JsonObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
 /**
@@ -43,13 +45,17 @@ public class Weather {
     public Weather(){
     }
 
-    public Weather(JsonObject o) {
+    public Weather(JsonObject o, String timezone) {
         this.weatherDescription = o.get("weather").getAsJsonObject().get("description").getAsString();
         this.weatherIcon = o.get("weather").getAsJsonObject().get("icon").getAsString();
         this.weatherCode = o.get("weather").getAsJsonObject().get("code").getAsInt();
         this.date = o.get("valid_date").getAsString();
-        this.sunrise = getTime(o.get("sunrise_ts").getAsLong());
-        this.sunset = getTime(o.get("sunset_ts").getAsLong());
+        
+        
+        this.sunrise = getTime(o.get("sunrise_ts").getAsLong(), timezone);
+        this.sunset = getTime(o.get("sunset_ts").getAsLong(), timezone);
+        
+        
         this.temp = o.get("temp").getAsInt();
         this.pop = o.get("pop").getAsInt();
         this.clouds = o.get("clouds").getAsInt();
@@ -62,10 +68,10 @@ public class Weather {
      * @param timeStamp
      * @return a String representation of current time in HH:mm format
      */
-    private String getTime(long timeStamp) {
+    private String getTime(long timeStamp, String timezone) {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm");
         return Instant.ofEpochSecond(timeStamp).
-                atZone(ZoneOffset.UTC).toLocalTime().format(dtf);
+                atZone(ZoneId.of(timezone)).toLocalTime().format(dtf);
     }
 
 
