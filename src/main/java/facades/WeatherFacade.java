@@ -16,6 +16,10 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -133,6 +137,11 @@ public class WeatherFacade {
         opencageData.put("roadinfo_driveon",result.get("annotations").getAsJsonObject().get("roadinfo").getAsJsonObject().get("drive_on").getAsString());
         opencageData.put("roadinfo_unit",result.get("annotations").getAsJsonObject().get("roadinfo").getAsJsonObject().get("speed_in").getAsString());
         opencageData.put("qibla",result.get("annotations").getAsJsonObject().get("qibla").getAsString());
+        
+        final ZoneId zoneId = ZoneId.of(opencageData.get("timezone_region"));
+        final ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(Instant.now(), zoneId);
+        opencageData.put("currentHour", zonedDateTime.toString().split("T")[1].split(":")[0]);
+        
         return opencageData;
     }
     
@@ -152,7 +161,7 @@ public class WeatherFacade {
         String jsonStr = retrieveData(url);
         List<Weather> weatherList = new ArrayList();
         JsonObject jsonObject = new JsonParser().parse(jsonStr).getAsJsonObject();
-        JsonArray allDays = jsonObject.get("data").getAsJsonArray();
+        JsonArray allDays = jsonObject.get("data").getAsJsonArray();;
         for (JsonElement day : allDays) {
             weatherList.add(new Weather(day.getAsJsonObject()));
         }
