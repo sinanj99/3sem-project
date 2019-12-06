@@ -49,11 +49,11 @@ public class WeatherFacade {
     }
 
     private String getWeatherbit() {
-        return System.getenv("WEATHERBIT");
+        return "50f8d14b7d8a4c64ba1d5c32c9a3aae4";
     }
 
     private String getOpencage() {
-        return System.getenv("OPENCAGE");
+        return "0b7a954972ee4cada443b9fb6147a140";
     }
 
     /**
@@ -171,7 +171,7 @@ public class WeatherFacade {
         JsonObject result = new JsonParser().parse(jsonStr).getAsJsonObject()
                 .get("results").getAsJsonArray().get(0).getAsJsonObject();
         City city = new City(result);
-        city.setForecast(get7DayForecast(city.getLat(), city.getLon()));
+        city.setForecast(get7DayForecast(city));
         return city;
     }
 
@@ -186,13 +186,15 @@ public class WeatherFacade {
      * @throws ProtocolException
      * @throws IOException
      */
-    private List<Weather> get7DayForecast(Double lat, Double lon) throws MalformedURLException, IOException {
+    private List<Weather> get7DayForecast(City city) throws MalformedURLException, IOException {
         URL url = new URL("https://api.weatherbit.io/v2.0/forecast/daily?days=7&key=" + WEATHERBIT
-                + "&lat=" + lat + "&lon=" + lon);
+                + "&lat=" + city.getLat() + "&lon=" + city.getLon());
         String jsonStr = retrieveData(url);
         List<Weather> weatherList = new ArrayList();
         JsonObject jsonObject = new JsonParser().parse(jsonStr).getAsJsonObject();
         JsonArray allDays = jsonObject.get("data").getAsJsonArray();
+        System.out.println(jsonObject.get("city_name"));
+        city.setCityName(jsonObject.get("city_name").getAsString());
         String timezone = jsonObject.get("timezone").getAsString();
         for (JsonElement day : allDays) {
             weatherList.add(new Weather(day.getAsJsonObject(), timezone));

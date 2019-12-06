@@ -19,7 +19,7 @@ import java.util.List;
 public class City {
 
     @Schema(example = "Copenhagen", description = "Name of the city")
-    private final String cityName;
+    private String cityName;
     @Schema(example = "Denmark", description = "Name of the country")
     private final String country;
     @Schema(example = "Capital Region of Denmark", description = "State")
@@ -59,7 +59,6 @@ public class City {
     private List<Weather> forecast;
 
     public City(JsonObject o) {
-        this.cityName = o.get("components").getAsJsonObject().get("city").getAsString();
         this.lat = o.get("geometry").getAsJsonObject().get("lat").getAsDouble();
         this.lon = o.get("geometry").getAsJsonObject().get("lng").getAsDouble();
         this.continent = o.get("components").getAsJsonObject().get("continent").getAsString();
@@ -79,15 +78,18 @@ public class City {
         this.qibla = o.get("annotations").getAsJsonObject().get("qibla").getAsString();
         this.localHour = getLocalHour(this.timezoneRegion);
     }
+
     /**
      * Returns local hour
-     * @return 
+     *
+     * @return
      */
     private String getLocalHour(String timezoneRegion) {
         final ZoneId zoneId = ZoneId.of(timezoneRegion);
         final ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(Instant.now(), zoneId);
         return zonedDateTime.toString().split("T")[1].split(":")[0];
     }
+
     public String getCityName() {
         return cityName;
     }
@@ -170,6 +172,10 @@ public class City {
 
     public void setForecast(List<Weather> forecast) {
         this.forecast = forecast;
+    }
+
+    public void setCityName(String cityName) {
+        this.cityName = cityName;
     }
 
     @Override
