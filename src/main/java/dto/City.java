@@ -59,7 +59,7 @@ public class City {
     private List<Weather> forecast;
 
     public City(JsonObject o) {
-        this.cityName = o.get("components").getAsJsonObject().get("continent").getAsString();
+        this.cityName = o.get("components").getAsJsonObject().get("city").getAsString();
         this.lat = o.get("geometry").getAsJsonObject().get("lat").getAsDouble();
         this.lon = o.get("geometry").getAsJsonObject().get("lng").getAsDouble();
         this.continent = o.get("components").getAsJsonObject().get("continent").getAsString();
