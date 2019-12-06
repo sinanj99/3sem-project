@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package facades;
 
 import com.google.gson.JsonArray;
@@ -49,11 +44,11 @@ public class WeatherFacade {
     }
 
     private String getWeatherbit() {
-        return "50f8d14b7d8a4c64ba1d5c32c9a3aae4";
+        return System.getenv("WEATHERBIT");
     }
 
     private String getOpencage() {
-        return "0b7a954972ee4cada443b9fb6147a140";
+        return System.getenv("OPENCAGE");
     }
 
     /**
