@@ -25,8 +25,8 @@ import java.util.Scanner;
 public class WeatherFacade {
 
     private static WeatherFacade instance;
-    private final String WEATHERBIT = getWeatherbit();
-    private final String OPENCAGE = getOpencage();
+    private final String WEATHERBIT = "50f8d14b7d8a4c64ba1d5c32c9a3aae4";
+    private final String OPENCAGE = "0b7a954972ee4cada443b9fb6147a140";
 
     //Private Constructor to ensure Singleton
     private WeatherFacade() {
@@ -41,14 +41,6 @@ public class WeatherFacade {
             instance = new WeatherFacade();
         }
         return instance;
-    }
-
-    private String getWeatherbit() {
-        return System.getenv("WEATHERBIT");
-    }
-
-    private String getOpencage() {
-        return System.getenv("OPENCAGE");
     }
 
     /**
